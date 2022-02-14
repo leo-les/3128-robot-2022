@@ -3,7 +3,13 @@
   "exportUnit": "Always Meters",
   "maxVelocity": 4.0,
   "maxAcceleration": 2.0,
+<<<<<<< Updated upstream
   "trackWidth": 0.59312,
   "gameName": "Infinite Recharge 2021",
   "outputDir": ""
+=======
+  "trackWidth": 2.0,
+  "gameName": "Rapid React",
+  "outputDir": ".."
+>>>>>>> Stashed changes
 }
