@@ -17,15 +17,9 @@ import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-<<<<<<< Updated upstream
 import frc.team3128.Constants;
 import frc.team3128.Robot;
 import frc.team3128.common.hardware.motorcontroller.*;
-=======
-import frc.team3128.Constants.DriveConstants;
-import frc.team3128.common.hardware.motorcontroller.NAR_CANSparkMax;
-import frc.team3128.common.hardware.motorcontroller.NAR_TalonFX;
->>>>>>> Stashed changes
 import frc.team3128.common.infrastructure.NAR_EMotor;
 import net.thefletcher.revrobotics.enums.MotorType;
 
@@ -38,7 +32,6 @@ public class NAR_Drivetrain extends SubsystemBase {
 
     // Initialize the generic motors
 
-<<<<<<< Updated upstream
     private NAR_EMotor leftLeader = new NAR_TalonFX(Constants.DriveConstants.DRIVE_MOTOR_LEFT_LEADER_ID);
     private NAR_EMotor rightLeader = new NAR_TalonFX(Constants.DriveConstants.DRIVE_MOTOR_RIGHT_LEADER_ID);
     private NAR_EMotor leftFollower = new NAR_TalonFX(Constants.DriveConstants.DRIVE_MOTOR_LEFT_FOLLOWER_ID);
@@ -48,25 +41,12 @@ public class NAR_Drivetrain extends SubsystemBase {
     // private NAR_EMotor rightLeader = new NAR_TalonSRX(Constants.DriveConstants.DRIVE_MOTOR_RIGHT_LEADER_ID);
     // private NAR_EMotor leftFollower = new NAR_TalonSRX(Constants.DriveConstants.DRIVE_MOTOR_LEFT_FOLLOWER_ID);
     // private NAR_EMotor rightFollower = new NAR_TalonSRX(Constants.DriveConstants.DRIVE_MOTOR_RIGHT_FOLLOWER_ID);
-=======
-    // private NAR_EMotor leftLeader = new NAR_TalonFX(DriveConstants.DRIVE_MOTOR_LEFT_LEADER_ID);
-    // private NAR_EMotor rightLeader = new NAR_TalonFX(DriveConstants.DRIVE_MOTOR_RIGHT_LEADER_ID);
-    // private NAR_EMotor leftFollower = new NAR_TalonFX(DriveConstants.DRIVE_MOTOR_LEFT_FOLLOWER_ID);
-    // private NAR_EMotor rightFollower = new NAR_TalonFX(DriveConstants.DRIVE_MOTOR_RIGHT_FOLLOWER_ID);
->>>>>>> Stashed changes
 
     
-<<<<<<< Updated upstream
     // private NAR_EMotor leftLeader = new NAR_CANSparkMax(Constants.DriveConstants.KIT_MOTOR_LEFT_LEADER_ID, MotorType.kBrushless);
     // private NAR_EMotor rightLeader = new NAR_CANSparkMax(Constants.DriveConstants.KIT_MOTOR_RIGHT_LEADER_ID, MotorType.kBrushless);
     // private NAR_EMotor leftFollower = new NAR_CANSparkMax(Constants.DriveConstants.KIT_MOTOR_LEFT_FOLLOWER_ID, MotorType.kBrushless);
     // private NAR_EMotor rightFollower = new NAR_CANSparkMax(Constants.DriveConstants.KIT_MOTOR_RIGHT_FOLLOWER_ID, MotorType.kBrushless);
-=======
-    private NAR_EMotor leftLeader = new NAR_CANSparkMax(1, MotorType.kBrushless);
-    private NAR_EMotor rightLeader = new NAR_CANSparkMax(2, MotorType.kBrushless);
-    private NAR_EMotor leftFollower = new NAR_CANSparkMax(3, MotorType.kBrushless);
-    private NAR_EMotor rightFollower = new NAR_CANSparkMax(4, MotorType.kBrushless);
->>>>>>> Stashed changes
 
     public static NAR_Drivetrain instance;
 
@@ -86,18 +66,11 @@ public class NAR_Drivetrain extends SubsystemBase {
         leftFollower.follow(leftLeader);
         rightFollower.follow((rightLeader));
         
-<<<<<<< Updated upstream
         // Right side true for kitbot, left side true for speedy G
         leftLeader.setInverted(true);
         leftFollower.setInverted(true);
         rightLeader.setInverted(false);
         rightFollower.setInverted(false);
-=======
-        leftLeader.setInverted(false);
-        leftFollower.setInverted(false);
-        rightLeader.setInverted(true);
-        rightFollower.setInverted(true);
->>>>>>> Stashed changes
 
         robotDrive = new DifferentialDrive(
             new MotorControllerGroup(leftLeader, leftFollower),
