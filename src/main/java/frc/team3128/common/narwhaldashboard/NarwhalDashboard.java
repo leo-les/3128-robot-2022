@@ -164,7 +164,6 @@ public class NarwhalDashboard extends WebSocketServer {
                     obj.put("selected_pipeline", limelights.get(selectedLimelight).getSelectedPipeline());
                 }
 
-              //  if(constantsChanged) {
                 JSONObject constantsObj = new JSONObject();
                 for(String category : ConstantsInt.categories.keySet()) {
                     JSONArray catArr = new JSONArray();
@@ -190,8 +189,7 @@ public class NarwhalDashboard extends WebSocketServer {
                     constantsObj.put(category, catArr);  
                 }
                 obj.put("constants", constantsObj);
-               // constantsChanged = false;
-           // }
+
 
                 if(!pushed) {
                     JSONArray autoProgramArr = new JSONArray();
