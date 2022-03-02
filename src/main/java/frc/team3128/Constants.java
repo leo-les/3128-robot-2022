@@ -71,6 +71,14 @@ public class Constants {
             kVAngular,          // kvVoltSecondsPerRadian
             kAAngular           // kaVoltSecondsSquaredPerRadian
         );
+
+        public static final double TURN_kP = 6e-4; // 0.001;
+        public static final double TURN_kI = 0; // 0.02;
+        public static final double TURN_kD = 0; // 0.00006;
+        public static final double TURN_kF = 0.1; // 0.00006;
+
+        public static final double TURN_TOLERANCE = 2; // degrees
+        public static final double TURN_RATE_TOLERANCE = 0.5; // degres per second
     }
 
     public static class ClimberConstants {
@@ -102,7 +110,7 @@ public class Constants {
         public static final double CLIMB_ENC_DIAG_EXTENSION = 6600;//same as diag extension rn // old-7850; //-7379
         public static final double CLIMB_ENC_TO_TOP = 6300; // old -7825;
         public static final double TOLERANCE_TICKS = 100;
-
+        
     }
 
     public static class ShooterConstants {
