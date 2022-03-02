@@ -164,14 +164,14 @@ public class NarwhalDashboard extends WebSocketServer {
                     obj.put("selected_pipeline", limelights.get(selectedLimelight).getSelectedPipeline());
                 }
 
-
-                if(constantsChanged) {
-                JSONArray constantsArr = new JSONArray();
+              //  if(constantsChanged) {
+                JSONObject constantsObj = new JSONObject();
                 for(String category : ConstantsInt.categories.keySet()) {
                     JSONArray catArr = new JSONArray();
                     List<Field> fields = ConstantsInt.getConstantInfo(category);
                     for(Field field : fields) {
                         try {
+                        // get value from Field
                         Object value = field.get(null);
                         JSONObject newConstant = new JSONObject();
                         newConstant.put("name", field.getName());
@@ -181,14 +181,17 @@ public class NarwhalDashboard extends WebSocketServer {
                         newConstant.put("type", fieldType.substring(fieldType.indexOf(".")+1));
 
                         catArr.add(newConstant);
+                        Log.info("Narwhal Dashboard", "Constant Of "+newConstant.toJSONString());
                         }
                         catch(IllegalAccessException e) {
                             continue;
                         }
-                    }       
+                    } 
+                    constantsObj.put(category, catArr);  
                 }
-                constantsChanged = false;
-                }
+                obj.put("constants", constantsObj);
+               // constantsChanged = false;
+           // }
 
                 if(!pushed) {
                     JSONArray autoProgramArr = new JSONArray();
@@ -308,6 +311,7 @@ public class NarwhalDashboard extends WebSocketServer {
             String name = parts[2];
             String value = parts[3];
             ConstantsInt.updateConstant(category, name, value);
+            //constantsChanged = true;
         }
         else {
             Log.info("NarwhalDashboard", "Message recieved: " + message);

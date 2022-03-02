@@ -2,7 +2,7 @@ package frc.team3128.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 
-import frc.team3128.Constants.ShooterConstants;
+import frc.team3128.ConstantsInt.ShooterConstants;
 import frc.team3128.Constants.ConversionConstants;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
@@ -95,11 +95,9 @@ public class Shooter extends NAR_PIDSubsystem {
         
         m_controller.setPID(shooterState.kP, shooterState.kI, shooterState.kD);
         Log.info("Shooter", "Set state to " + state.toString());
-        Log.info("Shooter", "Set kP to " + state.kP.toString());
-        Log.info("Shooter", "Set kI to " + state.kI.toString());
-        Log.info("Shooter", "Set kD to " + state.kD.toString());
-
-        
+        Log.info("Shooter", "Set kP to " + state.kP);
+        Log.info("Shooter", "Set kI to " + state.kI);
+        Log.info("Shooter", "Set kD to " + state.kD);
     }
 
     /**

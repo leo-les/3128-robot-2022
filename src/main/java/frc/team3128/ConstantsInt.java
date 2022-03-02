@@ -61,6 +61,7 @@ public class ConstantsInt extends Constants {
                 try {
                     Field backConstantField = categoryClass.getSuperclass().getField(field.getName());
                     field.set(null, backConstantField.get(null));
+                    Log.info("Constants Interface", "Adding Constants Interface Field: "+field.getName());
                     constants.get(cat).add(field);
                 } catch (NoSuchFieldException e) {
                     Log.info("Constants Interface", "Constants Field does not Exist: "+field.getName());
