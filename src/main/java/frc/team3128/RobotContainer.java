@@ -257,9 +257,8 @@ public class RobotContainer {
 
         isBallWrongBottom.debounce(0.1).whenActive(new SequentialCommandGroup(
                                                         new CmdExtendIntake().withTimeout(0.1), 
-                                                        new CmdOuttake().withTimeout(.25)));
-                                                        new CmdIntakeCargo().withTimeout(0.25);
-
+                                                        new CmdOuttake().withInterrupt(() -> !m_hopper.getBallBottomColor()),
+                                                        new CmdIntakeCargo().withInterrupt(m_hopper::getBallTopLocation)));
 
         isBallWrongTopAndBottomCorrect.debounce(0.1).whenActive(new CmdShootSingleBall());
         
