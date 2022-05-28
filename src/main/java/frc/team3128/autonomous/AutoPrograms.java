@@ -21,6 +21,7 @@ import static frc.team3128.Constants.DriveConstants.*;
 import frc.team3128.commands.CmdAlign;
 import frc.team3128.commands.CmdExtendIntake;
 import frc.team3128.commands.CmdExtendIntakeAndRun;
+import frc.team3128.commands.CmdHopperShooting;
 import frc.team3128.commands.CmdInPlaceTurn;
 import frc.team3128.commands.CmdInPlaceTurnVision;
 import frc.team3128.commands.CmdRetractHopper;
@@ -349,9 +350,9 @@ public class AutoPrograms {
             new InstantCommand(() -> limelights.turnShooterLEDOn()),
             new ParallelCommandGroup(
                 new CmdAlign(),
-                new InstantCommand(() -> hopper.runHopper(-0.1)),
+                new CmdHopperShooting(shooter::isReady, 0.6),
                 new CmdShootSingleBall()
-            ).withTimeout(2).andThen(hopper::stopHopper, hopper),
+            ).withTimeout(2),
             new InstantCommand(() -> limelights.turnShooterLEDOff()),
             
             trajectoryCmd("S1H1_ii"),
@@ -375,9 +376,9 @@ public class AutoPrograms {
             new InstantCommand(() -> limelights.turnShooterLEDOn()),
             new ParallelCommandGroup(
                 new CmdAlign(),
-                new InstantCommand(() -> hopper.runHopper(-0.1)),
+                new CmdHopperShooting(shooter::isReady, 0.6),
                 new CmdShootSingleBall()
-            ).withTimeout(2).andThen(hopper::stopHopper, hopper),
+            ).withTimeout(2),
             new InstantCommand(() -> limelights.turnShooterLEDOff())
         );
 
@@ -396,9 +397,9 @@ public class AutoPrograms {
             new InstantCommand(() -> limelights.turnShooterLEDOn()),
             new ParallelCommandGroup(
                 new CmdAlign(),
-                new InstantCommand(() -> hopper.runHopper(-0.1)),
+                new CmdHopperShooting(shooter::isReady, 0.6),
                 new CmdShootSingleBall()
-            ).withTimeout(2).andThen(hopper::stopHopper, hopper),
+            ).withTimeout(2),
             new InstantCommand(() -> limelights.turnShooterLEDOff()),
 
             new InstantCommand(() -> intake.ejectIntake(), intake),
@@ -473,9 +474,9 @@ public class AutoPrograms {
             new InstantCommand(() -> shooter.setState(ShooterState.UPPERHUB)),
             new InstantCommand(() -> limelights.turnShooterLEDOn()),
             new ParallelCommandGroup(
-                new InstantCommand(() -> hopper.runHopper(-0.1)),
+                new CmdHopperShooting(shooter::isReady),
                 new CmdShootDist()
-            ).withTimeout(2).andThen(hopper::stopHopper, hopper)
+            ).withTimeout(2)
         );
     }
     
@@ -488,10 +489,10 @@ public class AutoPrograms {
             new CmdRetractHopper().withTimeout(0.5),
             new InstantCommand(() -> shooter.setState(ShooterState.UPPERHUB)),
             new ParallelCommandGroup(
-                new InstantCommand(() -> hood.startPID(angle)),
-                new InstantCommand(() -> hopper.runHopper(-0.1)),
+                new InstantCommand(() -> hood.startPID(angle), hood),
+                new CmdHopperShooting(shooter::isReady),
                 new CmdShootRPM(RPM)
-            ).withTimeout(2).andThen(hopper::stopHopper, hopper)
+            ).withTimeout(2)
         );
     }
 
@@ -502,9 +503,9 @@ public class AutoPrograms {
             new InstantCommand(() -> limelights.turnShooterLEDOn()),
             new ParallelCommandGroup(
                 new CmdAlign(),
-                new InstantCommand(() -> hopper.runHopper(-0.1)),
+                new CmdHopperShooting(shooter::isReady),
                 new CmdShootDist()
-            ).withTimeout(2).andThen(hopper::stopHopper, hopper),
+            ).withTimeout(2),
             new InstantCommand(() -> limelights.turnShooterLEDOff())
         );
     }
