@@ -2,6 +2,7 @@ package frc.team3128;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
@@ -49,6 +50,9 @@ import frc.team3128.subsystems.NAR_Drivetrain;
 import frc.team3128.subsystems.Shooter;
 import frc.team3128.subsystems.Shooter.ShooterState;
 
+import edu.wpi.first.wpilibj.util.Color;
+import com.revrobotics.ColorSensorV3;
+
 /**
  * This class is where the bulk of the robot should be declared. Since
  * Command-based is a "declarative" paradigm, very little robot logic should
@@ -64,6 +68,8 @@ public class RobotContainer {
     private Climber m_climber;
     private Hood m_hood;
     private LimelightSubsystem m_ll;
+    private final I2C.Port i2cPort = I2C.Port.kMXP;
+    private final ColorSensorV3 m_colorSensor = new ColorSensorV3(i2cPort);
 
     private NAR_Joystick m_leftStick;
     private NAR_Joystick m_rightStick;
@@ -86,6 +92,7 @@ public class RobotContainer {
         m_climber = Climber.getInstance();
         m_hood = Hood.getInstance();
         m_ll = LimelightSubsystem.getInstance();
+        
 
         //Enable all PIDSubsystems so that useOutput runs
         m_shooter.enable();
@@ -303,6 +310,15 @@ public class RobotContainer {
         SmartDashboard.putString("Intake state:", m_intake.getSolenoid());
         SmartDashboard.putBoolean("isReady", m_shooter.isReady());
         SmartDashboard.putBoolean("isShooting Trigger", isShooting.getAsBoolean());
+
+        Color detectedColor = m_colorSensor.getColor();
+        double IR = m_colorSensor.getIR();
+        int proximity = m_colorSensor.getProximity();
+        SmartDashboard.putNumber("Red", detectedColor.red);
+        SmartDashboard.putNumber("Green", detectedColor.green);
+        SmartDashboard.putNumber("Blue", detectedColor.blue);
+        SmartDashboard.putNumber("IR", IR);
+        SmartDashboard.putNumber("Proximity", proximity);
     }
 
     public void initPneumatics() {
