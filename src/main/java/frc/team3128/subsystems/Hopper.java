@@ -7,6 +7,14 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.team3128.common.hardware.motorcontroller.NAR_TalonSRX;
+
+import frc.team3128.common.infrastructure.NAR_EMotor;
+import frc.team3128.Constants;
+import frc.team3128.common.hardware.PicoColorSensor;
+import frc.team3128.common.hardware.PicoColorSensor.RawColor;
+import edu.wpi.first.wpilibj.DriverStation; 
+import static frc.team3128.Constants.VisionConstants.*;
+
 import static frc.team3128.Constants.HopperConstants.*;
 
 public class Hopper extends SubsystemBase {
@@ -16,6 +24,8 @@ public class Hopper extends SubsystemBase {
     private NAR_TalonSRX m_hopper1, m_hopper2;
 
     private Encoder m_encoder;
+
+    private PicoColorSensor m_colorSensor;
 
     public Hopper() {
         configMotors();
@@ -86,5 +96,41 @@ public class Hopper extends SubsystemBase {
     public void setNeutralMode(NeutralMode mode) {
         m_hopper1.setNeutralMode(mode);
         m_hopper2.setNeutralMode(mode);
+    }
+
+    public boolean getBallBottomLocation() {
+        return m_colorSensor.getProximity0() > PROXIMITY_SENSOR_THRESHOLD;
+    }
+
+    public boolean getBallTopLocation() {
+        return m_colorSensor.getProximity1() > PROXIMITY_SENSOR_THRESHOLD;
+    }
+
+    public boolean getBallBottomColor() {
+        RawColor color = m_colorSensor.getRawColor0();
+        if (color.red > color.blue*COLOR_SENSOR_TOLERANCE) {
+            //return if red
+            return DriverStation.getAlliance() != DriverStation.Alliance.Red;
+        } else if (color.blue > color.red*COLOR_SENSOR_TOLERANCE) {
+            //return if blue
+            return DriverStation.getAlliance() != DriverStation.Alliance.Blue;
+        } else {
+            //if no colors are significantly greater 
+            return false;
+        }
+    }
+
+    public boolean getBallTopColor() {
+        RawColor color = m_colorSensor.getRawColor1();
+        if (color.red > color.blue*1.5) {
+            //return if red
+            return DriverStation.getAlliance() != DriverStation.Alliance.Red;
+        } else if (color.blue > color.red*1.5) {
+            //return if blue
+            return DriverStation.getAlliance() != DriverStation.Alliance.Blue;
+        } else {
+            //if no colors are significantly greater 
+            return false;
+        }
     }
 }

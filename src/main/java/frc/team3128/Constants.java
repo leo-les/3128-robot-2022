@@ -313,5 +313,10 @@ public class Constants {
 
         public static final double BALL_VEL_THRESHOLD = 2.54; // m/s - 100 in/s 
         public static final int BALL_VEL_PLATEAU_THRESHOLD = 10;
+
+        public static final double COLOR_SENSOR_TOLERANCE = 1.5;
+        public static final int PROXIMITY_SENSOR_MAX = 2047;
+        public static final double PROXIMITY_SENSOR_THRESHOLD = PROXIMITY_SENSOR_MAX*.75;
+
     }
 }

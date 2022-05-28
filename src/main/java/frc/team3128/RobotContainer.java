@@ -34,6 +34,7 @@ import frc.team3128.commands.CmdOuttake;
 import frc.team3128.commands.CmdRetractHopper;
 import frc.team3128.commands.CmdShootDist;
 import frc.team3128.commands.CmdShootRPM;
+import frc.team3128.commands.CmdShootSingleBall;
 import frc.team3128.common.hardware.input.NAR_Joystick;
 import frc.team3128.common.hardware.limelight.LEDMode;
 import frc.team3128.common.hardware.limelight.Limelight;
@@ -48,7 +49,7 @@ import frc.team3128.subsystems.LimelightSubsystem;
 import frc.team3128.subsystems.NAR_Drivetrain;
 import frc.team3128.subsystems.Shooter;
 import frc.team3128.subsystems.Shooter.ShooterState;
-
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 /**
  * This class is where the bulk of the robot should be declared. Since
  * Command-based is a "declarative" paradigm, very little robot logic should
@@ -64,6 +65,11 @@ public class RobotContainer {
     private Climber m_climber;
     private Hood m_hood;
     private LimelightSubsystem m_ll;
+
+    private Trigger isBallWrongBoth;
+    private Trigger isBallWrongBottom;
+    private Trigger isBallWrongTopAndBottomCorrect;
+    private Trigger isBallWrongTopAndBottomMissing;
 
     private NAR_Joystick m_leftStick;
     private NAR_Joystick m_rightStick;
@@ -90,6 +96,27 @@ public class RobotContainer {
         //Enable all PIDSubsystems so that useOutput runs
         m_shooter.enable();
         m_hood.enable();
+
+        isBallWrongBoth = new Trigger(m_hopper::getBallBottomLocation)
+                            .and(new Trigger(m_hopper::getBallTopLocation))
+                            .and(new Trigger(m_hopper::getBallBottomColor))
+                            .and(new Trigger(m_hopper::getBallTopColor));
+
+        isBallWrongBottom = new Trigger(m_hopper::getBallBottomLocation)
+                                .and(new Trigger(m_hopper::getBallTopLocation))
+                                .and(new Trigger(m_hopper::getBallBottomColor))
+                                .and(new Trigger(() -> !m_hopper.getBallTopColor()));
+
+        isBallWrongTopAndBottomCorrect = new Trigger(m_hopper::getBallTopLocation)
+                                            .and(new Trigger(m_hopper::getBallBottomLocation))
+                                            .and(new Trigger(() -> !m_hopper.getBallBottomColor()))
+                                            .and(new Trigger(m_hopper::getBallTopColor));
+        
+        isBallWrongTopAndBottomMissing = new Trigger(() -> !m_hopper.getBallBottomLocation())
+                                            .and(new Trigger(m_hopper::getBallTopLocation))
+                                            .and(new Trigger(() -> !m_hopper.getBallTopColor()));
+
+
 
         m_leftStick = new NAR_Joystick(0);
         m_rightStick = new NAR_Joystick(1);
@@ -232,11 +259,30 @@ public class RobotContainer {
         m_leftStick.getButton(8).whenPressed(new CmdClimbEncoder(CLIMB_ENC_TO_TOP));
         m_leftStick.getButton(10).whenPressed(new CmdClimbEncoder(-120));
 
+
         // Triggers
 
         isShooting.debounce(0.1).whenActive(new InstantCommand(m_hopper::runHopper, m_hopper))
                                         .whenInactive(new InstantCommand(m_hopper::stopHopper, m_hopper));
+       
+        isBallWrongBoth.debounce(0.1).whenActive(new SequentialCommandGroup(
+                                                    new CmdRetractHopper().withTimeout(0.5), 
+                                                    new ParallelCommandGroup(
+                                                            new InstantCommand(() -> m_hood.startPID(7), m_hood),
+                                                            new CmdShootRPM(700), 
+                                                            new CmdHopperShooting(m_shooter::isReady))))
+                                    .whenInactive(new ParallelCommandGroup(new InstantCommand(m_shooter::stopShoot, m_shooter)));
+
+        isBallWrongBottom.debounce(0.1).whenActive(new SequentialCommandGroup(
+                                                        new CmdExtendIntake().withTimeout(0.1), 
+                                                        new CmdOuttake().withInterrupt(() -> !m_hopper.getBallBottomColor()),
+                                                        new CmdIntakeCargo().withInterrupt(m_hopper::getBallTopLocation)));
+
+        isBallWrongTopAndBottomCorrect.debounce(0.1).whenActive(new CmdShootSingleBall());
         
+        isBallWrongTopAndBottomMissing.debounce(0.1).whenActive(new CmdShootSingleBall());
+
+
     }
 
     public void init() {
