@@ -112,7 +112,10 @@ public class Hopper extends SubsystemBase {
         return m_colorSensor.getProximity1() > PROXIMITY_SENSOR_THRESHOLD;
     }
 
-    public boolean getBallBottomColor() {
+    /**
+     * Returns true if bottom ball is wrong color, false if ball is right color or missing
+     */
+    public boolean getWrongBallBottom() {
         RawColor color = m_colorSensor.getRawColor0();
         if (color.red > color.blue*COLOR_SENSOR_TOLERANCE) {
             //return if red
@@ -120,13 +123,14 @@ public class Hopper extends SubsystemBase {
         } else if (color.blue > color.red*COLOR_SENSOR_TOLERANCE) {
             //return if blue
             return DriverStation.getAlliance() != DriverStation.Alliance.Blue;
-        } else {
-            //if no colors are significantly greater 
-            return false;
-        }
+        } 
+        return false;
     }
 
-    public boolean getBallTopColor() {
+    /**
+     * Returns true if top ball is wrong color, false if ball is right color or missing
+     */
+    public boolean getWrongBallTop() {
         RawColor color = m_colorSensor.getRawColor1();
         if (color.red > color.blue*1.5) {
             //return if red
@@ -134,9 +138,7 @@ public class Hopper extends SubsystemBase {
         } else if (color.blue > color.red*1.5) {
             //return if blue
             return DriverStation.getAlliance() != DriverStation.Alliance.Blue;
-        } else {
-            //if no colors are significantly greater 
-            return false;
         }
+        return false;
     }
 }

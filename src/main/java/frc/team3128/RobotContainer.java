@@ -63,10 +63,17 @@ public class RobotContainer {
     private Hood m_hood;
     private LimelightSubsystem m_ll;
 
+    private Trigger isBallTop;
+    private Trigger isBallBottom;
     private Trigger isBallWrongBoth;
     private Trigger isBallWrongBottom;
     private Trigger isBallWrongTopAndBottomCorrect;
     private Trigger isBallWrongTopAndBottomMissing;
+    private Trigger isBallBottomCorrect;
+    private Trigger isBallTopCorrect;
+    private Trigger isBallBottomWrong;
+    private Trigger isBallTopWrong;
+    private Trigger isBallBottomMissing;
 
     private NAR_Joystick m_leftStick;
     private NAR_Joystick m_rightStick;
@@ -92,24 +99,36 @@ public class RobotContainer {
         m_shooter.enable();
         m_hood.enable();
 
-        isBallWrongBoth = new Trigger(m_hopper::getBallBottomLocation)
-                            .and(new Trigger(m_hopper::getBallTopLocation))
-                            .and(new Trigger(m_hopper::getBallBottomColor))
-                            .and(new Trigger(m_hopper::getBallTopColor));
+        //Basic color sensor triggers that sense a single ball position, used to form the more complicated triggers below
+        isBallBottom = new Trigger(m_hopper::getBallBottomLocation);
 
-        isBallWrongBottom = new Trigger(m_hopper::getBallBottomLocation)
-                                .and(new Trigger(m_hopper::getBallTopLocation))
-                                .and(new Trigger(m_hopper::getBallBottomColor))
-                                .and(new Trigger(() -> !m_hopper.getBallTopColor()));
+        isBallTop = new Trigger(m_hopper::getBallBottomLocation);
 
-        isBallWrongTopAndBottomCorrect = new Trigger(m_hopper::getBallTopLocation)
-                                            .and(new Trigger(m_hopper::getBallBottomLocation))
-                                            .and(new Trigger(() -> !m_hopper.getBallBottomColor()))
-                                            .and(new Trigger(m_hopper::getBallTopColor));
-        
-        isBallWrongTopAndBottomMissing = new Trigger(() -> !m_hopper.getBallBottomLocation())
-                                            .and(new Trigger(m_hopper::getBallTopLocation))
-                                            .and(new Trigger(() -> !m_hopper.getBallTopColor()));
+        isBallBottomWrong = isBallBottom
+                            .and(new Trigger(m_hopper::getWrongBallBottom));
+
+        isBallTopWrong = isBallTop
+                                .and(new Trigger(m_hopper::getWrongBallTop));
+
+        isBallBottomCorrect = isBallBottom
+                                .and(isBallBottomWrong.negate());
+                                
+        isBallTopCorrect = isBallTop
+                                .and(isBallTopWrong.negate());
+
+        //Color sensor triggers that actually trigger a response by the robot: a combination of the single triggers above
+        isBallWrongBoth = isBallBottomWrong
+                            .and(isBallTopWrong);
+
+        isBallWrongBottom = isBallBottomWrong
+                                .and(isBallTopCorrect);
+
+        isBallWrongTopAndBottomCorrect = isBallBottomCorrect
+                                            .and(isBallTopWrong);
+
+        isBallWrongTopAndBottomMissing = isBallBottom.negate()
+                                            .and(isBallTopWrong);
+
 
 
 
@@ -247,23 +266,26 @@ public class RobotContainer {
         m_leftStick.getButton(8).whenPressed(new CmdClimbEncoder(CLIMB_ENC_TO_TOP));
         m_leftStick.getButton(10).whenPressed(new CmdClimbEncoder(-120));
 
-        isBallWrongBoth.debounce(0.1).whenActive(new SequentialCommandGroup(
+        isBallWrongBoth.debounce(0.1).whileActiveOnce(new SequentialCommandGroup(
                                                     new CmdRetractHopper().withTimeout(0.5), 
                                                     new ParallelCommandGroup(
                                                             new InstantCommand(() -> m_hood.startPID(7), m_hood),
                                                             new CmdShootRPM(700), 
-                                                            new CmdHopperShooting(m_shooter::isReady))))
-                                    .whenInactive(new ParallelCommandGroup(new InstantCommand(m_shooter::stopShoot, m_shooter)));
+                                                            new CmdHopperShooting(m_shooter::isReady))));
 
-        isBallWrongBottom.debounce(0.1).whenActive(new SequentialCommandGroup(
+        isBallWrongBottom.debounce(0.1).whileActiveOnce(new SequentialCommandGroup(
                                                         new CmdExtendIntake().withTimeout(0.1), 
-                                                        new CmdOuttake().withInterrupt(() -> !m_hopper.getBallBottomColor()),
-                                                        new CmdIntakeCargo().withInterrupt(m_hopper::getBallTopLocation)));
+                                                        new CmdOuttake(0.5).withInterrupt(isBallBottomCorrect),
+                                                        new CmdIntakeCargo().withInterrupt(isBallTopCorrect)));
 
-        isBallWrongTopAndBottomCorrect.debounce(0.1).whenActive(new CmdShootSingleBall());
-        
-        isBallWrongTopAndBottomMissing.debounce(0.1).whenActive(new CmdShootSingleBall());
+        isBallWrongTopAndBottomCorrect.debounce(0.1).whileActiveOnce(new CmdShootSingleBall());
 
+        isBallWrongTopAndBottomMissing.debounce(0.1).whileActiveOnce(new SequentialCommandGroup(
+                                                    new CmdRetractHopper().withTimeout(0.5), 
+                                                    new ParallelCommandGroup(
+                                                            new InstantCommand(() -> m_hood.startPID(7), m_hood),
+                                                            new CmdShootRPM(700), 
+                                                            new CmdHopperShooting(m_shooter::isReady))));
 
     }
 
