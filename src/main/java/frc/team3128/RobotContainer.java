@@ -65,15 +65,12 @@ public class RobotContainer {
 
     private Trigger isBallTop;
     private Trigger isBallBottom;
-    private Trigger isBallWrongBoth;
     private Trigger isBallWrongBottom;
+    private Trigger isBallWrongTop;
+    private Trigger isBallWrongBoth;
+    private Trigger isBallWrongBottomAndTopCorrect;
     private Trigger isBallWrongTopAndBottomCorrect;
     private Trigger isBallWrongTopAndBottomMissing;
-    private Trigger isBallBottomCorrect;
-    private Trigger isBallTopCorrect;
-    private Trigger isBallBottomWrong;
-    private Trigger isBallTopWrong;
-    private Trigger isBallBottomMissing;
 
     private NAR_Joystick m_leftStick;
     private NAR_Joystick m_rightStick;
@@ -104,31 +101,29 @@ public class RobotContainer {
 
         isBallTop = new Trigger(m_hopper::getBallBottomLocation);
 
-        isBallBottomWrong = isBallBottom
-                            .and(new Trigger(m_hopper::getWrongBallBottom));
+        isBallWrongBottom = new Trigger(m_hopper::getWrongBallBottom);
 
-        isBallTopWrong = isBallTop
-                                .and(new Trigger(m_hopper::getWrongBallTop));
-
-        isBallBottomCorrect = isBallBottom
-                                .and(isBallBottomWrong.negate());
-                                
-        isBallTopCorrect = isBallTop
-                                .and(isBallTopWrong.negate());
+        isBallWrongTop = new Trigger(m_hopper::getWrongBallTop);
 
         //Color sensor triggers that actually trigger a response by the robot: a combination of the single triggers above
-        isBallWrongBoth = isBallBottomWrong
-                            .and(isBallTopWrong);
+        isBallWrongBoth = isBallBottom
+                            .and(isBallTop)
+                            .and(isBallWrongBottom)
+                            .and(isBallWrongTop);
 
-        isBallWrongBottom = isBallBottomWrong
-                                .and(isBallTopCorrect);
+        isBallWrongBottomAndTopCorrect = isBallBottom
+                                .and(isBallTop)
+                                .and(isBallWrongBottom)
+                                .and(isBallWrongTop.negate());
 
-        isBallWrongTopAndBottomCorrect = isBallBottomCorrect
-                                            .and(isBallTopWrong);
+        isBallWrongTopAndBottomCorrect = isBallBottom
+                                            .and(isBallTop)
+                                            .and(isBallWrongBottom.negate())
+                                            .and(isBallWrongTop);
 
         isBallWrongTopAndBottomMissing = isBallBottom.negate()
-                                            .and(isBallTopWrong);
-
+                                            .and(isBallTop)
+                                            .and(isBallWrongTop);
 
 
 
@@ -273,10 +268,10 @@ public class RobotContainer {
                                                             new CmdShootRPM(700), 
                                                             new CmdHopperShooting(m_shooter::isReady))));
 
-        isBallWrongBottom.debounce(0.1).whileActiveOnce(new SequentialCommandGroup(
+        isBallWrongBottomAndTopCorrect.debounce(0.1).whileActiveOnce(new SequentialCommandGroup(
                                                         new CmdExtendIntake().withTimeout(0.1), 
-                                                        new CmdOuttake(0.5).withInterrupt(isBallBottomCorrect),
-                                                        new CmdIntakeCargo().withInterrupt(isBallTopCorrect)));
+                                                        new CmdOuttake(0.5).withTimeout(0.1),
+                                                        new CmdIntakeCargo().withTimeout(0.1)));
 
         isBallWrongTopAndBottomCorrect.debounce(0.1).whileActiveOnce(new CmdShootSingleBall());
 
@@ -351,6 +346,15 @@ public class RobotContainer {
         SmartDashboard.putNumber("Hood angle", m_hood.getMeasurement());
 
         SmartDashboard.putString("Intake state:", m_intake.getSolenoid());
+
+        SmartDashboard.putBoolean("isBallBottom", isBallBottom.get());
+        SmartDashboard.putBoolean("isBallTop", isBallTop.get());
+        SmartDashboard.putBoolean("isBallWrongBottom", isBallWrongBottom.get());
+        SmartDashboard.putBoolean("isBallWrongTop", isBallWrongTop.get());
+        SmartDashboard.putBoolean("isBallWrongBoth", isBallWrongBoth.get());
+        SmartDashboard.putBoolean("isBallWrongTopAndBottomCorrect", isBallWrongTopAndBottomCorrect.get());
+        SmartDashboard.putBoolean("isBallWrongTopAndBottomMissing", isBallWrongTopAndBottomMissing.get());
+        SmartDashboard.putBoolean("isBallWrongBottomAndTopCorrect", isBallWrongBottomAndTopCorrect.get());
     }
 
     public void initPneumatics() {
