@@ -30,6 +30,7 @@ public class Hopper extends SubsystemBase {
     public Hopper() {
         configMotors();
         configEncoders();
+        m_colorSensor = new PicoColorSensor();
         // resetEncoder();
     }
 
