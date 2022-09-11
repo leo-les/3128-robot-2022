@@ -4,6 +4,11 @@ import com.ctre.phoenix.motorcontrol.ControlFrame;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 
+import frc.team3128.common.hardware.PicoColorSensor;
+import frc.team3128.common.hardware.PicoColorSensor.RawColor;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DriverStation;
+
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -19,6 +24,10 @@ public class Hopper extends SubsystemBase {
 
     private static Hopper instance;
 
+    private PicoColorSensor m_colorSensor;
+    private DigitalInput m_bottomDistanceSensor;
+    private DigitalInput m_topDistanceSensor;
+
     private NAR_TalonSRX m_hopper1, m_hopper2;
 
     private Encoder m_encoder;
@@ -26,6 +35,7 @@ public class Hopper extends SubsystemBase {
     public Hopper() {
         configMotors();
         configEncoders();
+        configSensors();
     }
 
     public static synchronized Hopper getInstance() {
@@ -59,6 +69,12 @@ public class Hopper extends SubsystemBase {
     private void configEncoders() {
         m_encoder = new Encoder(HOPPER_DIO_PIN1, HOPPER_DIO_PIN2);
         m_encoder.setReverseDirection(true);
+    }
+
+    private void configSensors() {
+        m_colorSensor = new PicoColorSensor();
+        m_bottomDistanceSensor = new DigitalInput(0);
+        m_topDistanceSensor = new DigitalInput(1);
     }
 
     @Override
@@ -109,6 +125,45 @@ public class Hopper extends SubsystemBase {
      */
     public double getHopperDistance() {
         return m_encoder.getDistance();
+    }
+
+    
+    public boolean getBallBottomLocation() {
+        return m_bottomDistanceSensor.get();
+    }
+
+    public boolean getBallTopLocation() {
+        return m_topDistanceSensor.get();
+    }
+
+    /**
+     * Returns true if bottom ball is wrong color, false if ball is right color or missing
+     */
+    public boolean getWrongBallBottom() {
+        RawColor color = m_colorSensor.getRawColor0();
+        if (color.red > color.blue*COLOR_SENSOR_TOLERANCE) {
+            //return if red
+            return DriverStation.getAlliance() != DriverStation.Alliance.Red;
+        } else if (color.blue > color.red*COLOR_SENSOR_TOLERANCE) {
+            //return if blue
+            return DriverStation.getAlliance() != DriverStation.Alliance.Blue;
+        } 
+        return false;
+    }
+
+    /**
+     * Returns true if top ball is wrong color, false if ball is right color or missing
+     */
+    public boolean getWrongBallTop() {
+        RawColor color = m_colorSensor.getRawColor1();
+        if (color.red > color.blue*1.5) {
+            //return if red
+            return DriverStation.getAlliance() != DriverStation.Alliance.Red;
+        } else if (color.blue > color.red*1.5) {
+            //return if blue
+            return DriverStation.getAlliance() != DriverStation.Alliance.Blue;
+        }
+        return false;
     }
 
 }

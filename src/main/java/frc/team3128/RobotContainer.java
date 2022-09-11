@@ -27,8 +27,11 @@ import frc.team3128.commands.CmdExtendIntake;
 import frc.team3128.commands.CmdExtendIntakeAndRun;
 import frc.team3128.commands.CmdIntakeCargo;
 import frc.team3128.commands.CmdOuttake;
+import frc.team3128.commands.CmdRetractHopper;
 import frc.team3128.commands.CmdShoot;
 import frc.team3128.commands.CmdShootAlign;
+import frc.team3128.commands.CmdShootRPM;
+import frc.team3128.commands.CmdShootSingleBall;
 import frc.team3128.common.hardware.input.NAR_Joystick;
 import frc.team3128.common.hardware.limelight.LEDMode;
 import frc.team3128.common.hardware.limelight.Limelight;
@@ -58,6 +61,15 @@ public class RobotContainer {
     private Hood m_hood;
     private LimelightSubsystem m_ll;
 
+    private Trigger isBallTop;
+    private Trigger isBallBottom;
+    private Trigger isBallWrongBottom;
+    private Trigger isBallWrongTop;
+    private Trigger isBallWrongBoth;
+    private Trigger isBallWrongBottomAndTopCorrect;
+    private Trigger isBallWrongTopAndBottomCorrect;
+    private Trigger isBallWrongTopAndBottomMissing;
+
     private NAR_Joystick m_leftStick;
     private NAR_Joystick m_rightStick;
 
@@ -80,6 +92,36 @@ public class RobotContainer {
         //Enable all PIDSubsystems so that useOutput runs
         m_shooter.enable();
         m_hood.enable();
+
+        //Basic color sensor triggers that sense a single ball position, used to form the more complicated triggers below
+        isBallBottom = new Trigger(m_hopper::getBallBottomLocation);
+
+        isBallTop = new Trigger(m_hopper::getBallBottomLocation);
+
+        isBallWrongBottom = new Trigger(m_hopper::getWrongBallBottom);
+
+        isBallWrongTop = new Trigger(m_hopper::getWrongBallTop);
+
+        //Color sensor triggers that actually trigger a response by the robot: a combination of the single triggers above
+        isBallWrongBoth = isBallBottom
+                            .and(isBallTop)
+                            .and(isBallWrongBottom)
+                            .and(isBallWrongTop);
+
+        isBallWrongBottomAndTopCorrect = isBallBottom
+                                .and(isBallTop)
+                                .and(isBallWrongBottom)
+                                .and(isBallWrongTop.negate());
+
+        isBallWrongTopAndBottomCorrect = isBallBottom
+                                            .and(isBallTop)
+                                            .and(isBallWrongBottom.negate())
+                                            .and(isBallWrongTop);
+
+        isBallWrongTopAndBottomMissing = isBallBottom.negate()
+                                            .and(isBallTop)
+                                            .and(isBallWrongTop);
+
 
         m_leftStick = new NAR_Joystick(0);
         m_rightStick = new NAR_Joystick(1);
@@ -178,7 +220,27 @@ public class RobotContainer {
 
         isShooting.debounce(0.1).whenActive(new InstantCommand(m_hopper::runHopper, m_hopper))
                                         .whenInactive(new InstantCommand(m_hopper::stopHopper, m_hopper));
-        
+
+        // COLOR SENSOR TRIGGERS
+        isBallWrongBoth.debounce(0.1).whileActiveOnce(new SequentialCommandGroup(
+                                                    new CmdRetractHopper().withTimeout(0.5), 
+                                                    new ParallelCommandGroup(
+                                                            new InstantCommand(() -> m_hood.startPID(7), m_hood),
+                                                            new CmdShootRPM(700))));
+
+        isBallWrongBottomAndTopCorrect.debounce(0.1).whileActiveOnce(new SequentialCommandGroup(
+                                                        new CmdExtendIntake().withTimeout(0.1), 
+                                                        new CmdOuttake(0.5).withTimeout(0.1),
+                                                        new CmdIntakeCargo().withTimeout(0.1)));
+
+        isBallWrongTopAndBottomCorrect.debounce(0.1).whileActiveOnce(new CmdShootSingleBall());
+
+        isBallWrongTopAndBottomMissing.debounce(0.1).whileActiveOnce(new SequentialCommandGroup(
+                                                    new CmdRetractHopper().withTimeout(0.5), 
+                                                    new ParallelCommandGroup(
+                                                            new InstantCommand(() -> m_hood.startPID(7), m_hood),
+                                                            new CmdShootRPM(700))));
+
     }
 
     public void init() {

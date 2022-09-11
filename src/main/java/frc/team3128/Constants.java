@@ -148,6 +148,8 @@ public class Constants {
         public static final double HOPPER_MOTOR_2_POWER = 0.7;
         public static final double REVERSE_HOPPER_MOTOR_POWER = -1;
 
+        public static final double COLOR_SENSOR_TOLERANCE = 1.5;
+
     }
 
     public static class IntakeConstants {
