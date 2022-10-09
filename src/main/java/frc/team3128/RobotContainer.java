@@ -105,6 +105,7 @@ public class RobotContainer {
         isBallWrongTop = new Trigger(m_hopper::getWrongBallTop);
 
         //Color sensor triggers that actually trigger a response by the robot: a combination of the single triggers above
+
         isBallWrongBoth = isBallBottom
                             .and(isBallTop)
                             .and(isBallWrongBottom)
@@ -232,12 +233,17 @@ public class RobotContainer {
                                                             new InstantCommand(() -> m_hood.startPID(7), m_hood),
                                                             new CmdShootRPM(700))));
 
-        isBallWrongBottomAndTopCorrect.debounce(0.1).whileActiveOnce(new SequentialCommandGroup(
-                                                        new CmdExtendIntake().withTimeout(0.1), 
-                                                        new CmdOuttake(0.5).withTimeout(0.1),
-                                                        new CmdIntakeCargo().withTimeout(0.1)));
+        isBallWrongBottomAndTopCorrect.debounce(0.1).whileActiveOnce(new CmdExtendIntake().withTimeout(0.1))
+                                                    .whileActiveContinuous(new CmdOuttake(0.5))
+                                                    .whenInactive(new CmdIntakeCargo().withTimeout(0.1));
 
         isBallWrongTopAndBottomCorrect.debounce(0.1).whileActiveOnce(new CmdShootSingleBall());
+
+        /*
+        isBallWrongTopAndBottomCorrect.debounce(0.1).whileActiveOnce(new)
+        
+        
+        */
 
         isBallWrongTopAndBottomMissing.debounce(0.1).whileActiveOnce(new SequentialCommandGroup(
                                                     new CmdRetractHopper().withTimeout(0.5), 
